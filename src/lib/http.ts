@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import envConfig from "@/config"
-import { LoginResType } from "@/schemaValidations/auth.schema"
+import { LoginResType } from "@/schemas/auth.schema"
 import { redirect } from "next/navigation"
 
 type CustomOptions = Omit<RequestInit, 'method'> & {
