@@ -25,47 +25,37 @@ export class HttpError extends Error {
         message: string
         [key: string]: any
     }
-    constructor({status, payload} : {status: number, payload: any}) {
-        super('Http Error')
+    constructor({status, payload, message = 'HTTP Error'} : {status: number, payload: any, message?: string}) {
+        super(message)
         this.status = status
         this.payload = payload
     }
 }
 
 export class EntityError extends HttpError {
-    status: 422
+    status: typeof ENTITY_ERROR_STATUS
     payload: EntityErrorPayload
-    constructor({status, payload}: {status: 422, payload: EntityErrorPayload}) {
-        super({status, payload})
+    constructor({status, payload}: {status: typeof ENTITY_ERROR_STATUS, payload: EntityErrorPayload}) {
+        super({status, payload, message: 'Entity Error'})
         this.status = status
         this.payload = payload
     }
-}
+} 
 
-// class SessionToken {
-//     private token = ''
-//     get value() {
-//         return this.token
-//     }
 
-//     set value(token: string) {
-//         //ko the goi o server component
-//         if(typeof window === 'undefined') {
-//             throw new Error('Cannot set token on server component')
-//         }
-//         this.token = token
-//     }
-// }
-
-// export const clientSessionToken = new SessionToken()
-
-export const isClient = () => typeof window !== 'undefined'
+const isClient = typeof window !== 'undefined'
 
 let clientLogoutRequest: null | Promise<any> = null
 
-const request = async <Response>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', url: string, options?: CustomOptions | undefined) => {
 
+
+const request = async <Response>(
+    method: 'GET' | 'POST' | 'PUT' | 'DELETE', 
+    url: string, 
+    options?: CustomOptions | undefined
+) => {
     let body: FormData | string | undefined = undefined
+
     if (options?.body instanceof FormData) {
         body = options.body
     } else if (options?.body) {
@@ -74,20 +64,22 @@ const request = async <Response>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', url:
 
     const baseHeaders: {
         [key: string] : string
-    } = body instanceof FormData ? {} : {
-        'Content-Type': 'application/json'
-    }
+    } = body instanceof FormData 
+            ? {} 
+            : {
+                'Content-Type': 'application/json'
+              }
 
-    if(isClient()) {
-        const sessionToken = localStorage.getItem('sessionToken')
-        if(sessionToken) {
-            baseHeaders.Authorization = `Bearer ${sessionToken}`
+    if(isClient) {
+        const accessToken = localStorage.getItem('accessToken')
+        if(accessToken) {
+            baseHeaders.Authorization = `Bearer ${accessToken}`
         }
-    }  
-
-
-
-    const baseUrl = options?.baseUrl === undefined ? envConfig.NEXT_PUBLIC_API_ENDPOINT : options.baseUrl
+    }
+    const baseUrl = 
+        options?.baseUrl === undefined 
+            ? envConfig.NEXT_PUBLIC_API_ENDPOINT 
+            : options.baseUrl
 
     const fullUrl = url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`
 
@@ -100,13 +92,12 @@ const request = async <Response>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', url:
         body,
         method
     })
-
     const payload: Response = await res.json()
     const data = {
         status: res.status,
         payload
     }
-
+    //_____________interceptor_______________//
     if(!res.ok) {
         if(res.status === ENTITY_ERROR_STATUS) {
             throw new EntityError(data as {
@@ -115,14 +106,14 @@ const request = async <Response>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', url:
             })
             //handle 401 token is expired
         } else if(res.status === AUTHENTICATION_ERROR_STATUS) {
-            if(isClient()) {
+            if(isClient) {
                 if(!clientLogoutRequest) {
                     clientLogoutRequest = fetch('/api/auth/logout', {
                         method: 'POST',
-                        body: JSON.stringify({ force: true }),
+                        body: null, //Logout cho phep luon luon thanh cong
                         headers: {
-                            
-                        }
+                            ...baseHeaders
+                        } as any
                     })
 
                     try {
@@ -131,33 +122,35 @@ const request = async <Response>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', url:
                     } catch(error) {
                         console.log(error)
                     } finally {
-                        localStorage.removeItem('sessionToken')
-                        localStorage.removeItem('sessionTokenExpiresAt')
+                        localStorage.removeItem('accessToken')
+                        localStorage.removeItem('refreshToken')
                         clientLogoutRequest = null
+                        //redirect to login can make infinite loop error
                         location.href = '/login'
                     }
                     
                 }
             } else {
-                const sessionToken = (options?.headers as any)?.Authorization.split(' ')[1]
-                redirect(`/logout?sessionToken=${sessionToken}`)
+                const accessToken = (options?.headers as any)?.Authorization.split(' ')[1]
+                redirect(`/logout?accessToken=${accessToken}`)
             }
         } else {
             throw new HttpError(data)
         }
     }
     
-    if(isClient()) {
+
+    if(isClient) {
         const check = ['/auth/register', '/auth/login'].some(path => path.startsWith(url))
         const checkLogout = ['/auth/logout'].some(path => path.startsWith(url))
 
         if(check) {
-            const {token, expiresAt} = (payload as LoginResType).data
-            localStorage.setItem('sessionToken', token)
-            localStorage.setItem('sessionTokenExpiresAt', expiresAt)
+            const {accessToken, refreshToken} = (payload as LoginResType).data
+            localStorage.setItem('accessToken', accessToken)
+            localStorage.setItem('refreshToken', refreshToken)
         } else if(checkLogout) {
-            localStorage.removeItem('sessionToken')
-            localStorage.removeItem('sessionTokenExpiresAt')
+            localStorage.removeItem('accessToken')
+            localStorage.removeItem('refreshToken')
         }
     }
 
