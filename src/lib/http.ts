@@ -42,39 +42,51 @@ export class EntityError extends HttpError {
     }
 }
 
-class SessionToken {
-    private token = ''
-    get value() {
-        return this.token
-    }
+// class SessionToken {
+//     private token = ''
+//     get value() {
+//         return this.token
+//     }
 
-    set value(token: string) {
-        //ko the goi o server component
-        if(typeof window === 'undefined') {
-            throw new Error('Cannot set token on server component')
-        }
-        this.token = token
-    }
-}
+//     set value(token: string) {
+//         //ko the goi o server component
+//         if(typeof window === 'undefined') {
+//             throw new Error('Cannot set token on server component')
+//         }
+//         this.token = token
+//     }
+// }
 
-export const clientSessionToken = new SessionToken()
+// export const clientSessionToken = new SessionToken()
+
+export const isClient = () => typeof window !== 'undefined'
+
 let clientLogoutRequest: null | Promise<any> = null
 
 const request = async <Response>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', url: string, options?: CustomOptions | undefined) => {
 
-    const body = options?.body 
-    ? options.body instanceof FormData 
-     ? options.body 
-     : JSON.stringify(options.body) 
-    : undefined
-    const baseHeaders: HeadersInit | undefined = body instanceof FormData 
-    ? {    
-        Authorization: clientSessionToken.value ? `Bearer ${clientSessionToken.value}` : ''
+    let body: FormData | string | undefined = undefined
+    if (options?.body instanceof FormData) {
+        body = options.body
+    } else if (options?.body) {
+        body = JSON.stringify(options.body)
+    } 
+
+    const baseHeaders: {
+        [key: string] : string
+    } = body instanceof FormData ? {} : {
+        'Content-Type': 'application/json'
     }
-    : {
-        'Content-Type': 'application/json',
-        Authorization: clientSessionToken.value ? `Bearer ${clientSessionToken.value}` : ''
-    }
+
+    if(isClient()) {
+        const sessionToken = localStorage.getItem('sessionToken')
+        if(sessionToken) {
+            baseHeaders.Authorization = `Bearer ${sessionToken}`
+        }
+    }  
+
+
+
     const baseUrl = options?.baseUrl === undefined ? envConfig.NEXT_PUBLIC_API_ENDPOINT : options.baseUrl
 
     const fullUrl = url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`
@@ -103,7 +115,7 @@ const request = async <Response>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', url:
             })
             //handle 401 token is expired
         } else if(res.status === AUTHENTICATION_ERROR_STATUS) {
-            if(typeof window !== 'undefined') {
+            if(isClient()) {
                 if(!clientLogoutRequest) {
                     clientLogoutRequest = fetch('/api/auth/logout', {
                         method: 'POST',
@@ -113,11 +125,18 @@ const request = async <Response>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', url:
                         }
                     })
 
-                    await clientLogoutRequest
+                    try {
+                        await clientLogoutRequest
+
+                    } catch(error) {
+                        console.log(error)
+                    } finally {
+                        localStorage.removeItem('sessionToken')
+                        localStorage.removeItem('sessionTokenExpiresAt')
+                        clientLogoutRequest = null
+                        location.href = '/login'
+                    }
                     
-                    clientSessionToken.value = ''
-                    clientLogoutRequest = null
-                    location.href = '/login'
                 }
             } else {
                 const sessionToken = (options?.headers as any)?.Authorization.split(' ')[1]
@@ -128,14 +147,17 @@ const request = async <Response>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', url:
         }
     }
     
-    if(typeof window !== 'undefined') {
+    if(isClient()) {
         const check = ['/auth/register', '/auth/login'].some(path => path.startsWith(url))
         const checkLogout = ['/auth/logout'].some(path => path.startsWith(url))
 
         if(check) {
-            clientSessionToken.value = (payload as LoginResType).data.token
+            const {token, expiresAt} = (payload as LoginResType).data
+            localStorage.setItem('sessionToken', token)
+            localStorage.setItem('sessionTokenExpiresAt', expiresAt)
         } else if(checkLogout) {
-            clientSessionToken.value = ''
+            localStorage.removeItem('sessionToken')
+            localStorage.removeItem('sessionTokenExpiresAt')
         }
     }
 
@@ -155,8 +177,8 @@ const http = {
         return request<Response>('PUT', url, {...options, body})
     },
 
-    delete<Response>(url: string, body: any, options?: Omit<CustomOptions, 'body'> | undefined) {
-        return request<Response>('DELETE', url, {...options, body})
+    delete<Response>(url: string, options?: Omit<CustomOptions, 'body'> | undefined) {
+        return request<Response>('DELETE', url, {...options})
     }
 }
 
