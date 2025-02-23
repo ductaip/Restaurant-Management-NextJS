@@ -13,19 +13,9 @@ import { Label } from '@/components/ui/label'
 import { useForm } from 'react-hook-form'
 import { Form, FormField, FormItem, FormMessage } from '@/components/ui/form'
 import { LoginBody, LoginBodyType } from '@/schemas/auth.schema'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useLoginMutation } from '@/queries/useAuth'
-import { toast } from "sonner"
-import { handleErrorApi } from '@/lib/utils'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { useEffect } from 'react'
-import { useAppContext } from '@/components/app-provider'
+import { zodResolver } from '@hookform/resolvers/zod' 
 
-export default function LoginForm() {
-  const loginMutation = useLoginMutation()
-  const searchParams = useSearchParams()
-  const clearTokens = searchParams.get('clearTokens')
-  const { setRole } = useAppContext()
+export default function LoginForm() { 
   const form = useForm<LoginBodyType>({
     resolver: zodResolver(LoginBody),
     defaultValues: {
@@ -33,28 +23,7 @@ export default function LoginForm() {
       password: ''
     }
   })
-  const router = useRouter()
-  useEffect(() => {
-    if (clearTokens) {
-      setRole()
-    }
-  }, [clearTokens, setRole])
-  const onSubmit = async (data: LoginBodyType) => {
-    // Khi nhấn submit thì React hook form sẽ validate cái form bằng zod schema ở client trước
-    // Nếu không pass qua vòng này thì sẽ không gọi api
-    if (loginMutation.isPending) return
-    try {
-      const result = await loginMutation.mutateAsync(data)
-      toast(result.payload.message)
-      setRole(result.payload.data.account.role)
-      router.push('/manage/dashboard')
-    } catch (error: any) {
-      handleErrorApi({
-        error,
-        setError: form.setError
-      })
-    }
-  }
+   
 
   return (
     <Card className='mx-auto max-w-sm'>
@@ -66,12 +35,7 @@ export default function LoginForm() {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form
-            className='space-y-2 max-w-[600px] flex-shrink-0 w-full'
-            noValidate
-            onSubmit={form.handleSubmit(onSubmit, (err) => {
-              console.log(err)
-            })}
+          <form className='space-y-2 max-w-[600px] flex-shrink-0 w-full' noValidate 
           >
             <div className='grid gap-4'>
               <FormField

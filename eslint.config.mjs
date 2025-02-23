@@ -15,6 +15,7 @@ const eslintConfig = [
     rules: {
       "no-unused-vars": "off", // Disable the rule
     },
+    extends: ["plugin:@tanstack/query/recommended"]
   },
 ];
 
