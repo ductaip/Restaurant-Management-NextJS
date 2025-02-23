@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 import { Button } from '@/components/ui/button'
 import {
@@ -11,10 +12,10 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useForm } from 'react-hook-form'
 import { Form, FormField, FormItem, FormMessage } from '@/components/ui/form'
-import { LoginBody, LoginBodyType } from '@/schemaValidations/auth.schema'
+import { LoginBody, LoginBodyType } from '@/schemas/auth.schema'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useLoginMutation } from '@/queries/useAuth'
-import { toast } from '@/components/ui/use-toast'
+import { toast } from "sonner"
 import { handleErrorApi } from '@/lib/utils'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect } from 'react'
@@ -44,9 +45,7 @@ export default function LoginForm() {
     if (loginMutation.isPending) return
     try {
       const result = await loginMutation.mutateAsync(data)
-      toast({
-        description: result.payload.message
-      })
+      toast(result.payload.message)
       setRole(result.payload.data.account.role)
       router.push('/manage/dashboard')
     } catch (error: any) {
