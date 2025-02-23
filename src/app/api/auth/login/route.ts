@@ -8,12 +8,12 @@ import { HttpError } from "@/lib/http"
 export async function POST(request: Request) { 
     const body = (await request.json()) as LoginBodyType
     const cookieStore = await cookies()
-    try {
+    try { 
         const {payload} = await authApi.sLogin(body)
         const {data: {
             accessToken, refreshToken
         }} = payload
-
+        
         const decodeAccessToken = jwt.decode(accessToken) as {exp: number}
         const decodeRefreshToken = jwt.decode(refreshToken) as {exp: number}
 
