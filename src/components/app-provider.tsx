@@ -1,12 +1,10 @@
 'use client'
-import {
-    useQuery,
-    useMutation,
-    useQueryClient,
+import { 
     QueryClient,
     QueryClientProvider,
-  } from '@tanstack/react-query'
-  
+} from '@tanstack/react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+
   // Create a client
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -22,5 +20,6 @@ export default function AppProvider({ children }: {
 }) {
     return (<QueryClientProvider client={queryClient}>
             {children}
+            <ReactQueryDevtools initialIsOpen={false} />
         </QueryClientProvider>)
 }
