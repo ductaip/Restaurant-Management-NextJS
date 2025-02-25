@@ -32,7 +32,7 @@ export default function LoginForm() {
     if(loginMutation.isPending) return
     try {
       const result = await loginMutation.mutateAsync(data)
-      toast.success("Login successfully")
+      toast.success(result.payload.message)
     } catch (error: any) {
       handleErrorApi({error, setError: form.setError})
     }
@@ -49,7 +49,9 @@ export default function LoginForm() {
       <CardContent>
         <Form {...form}>
           <form className='space-y-2 max-w-[600px] flex-shrink-0 w-full' noValidate 
-            onSubmit={form.handleSubmit(onSubmit)}
+            onSubmit={form.handleSubmit(onSubmit, (err) => {
+              console.warn(err)
+            })}
           >
             <div className='grid gap-4'>
               <FormField

@@ -140,15 +140,13 @@ const request = async <Response>(
     }
     
 
-    if(isClient) {
-        const check = ['/auth/register', '/auth/login'].some(path => path.startsWith(url))
-        const checkLogout = ['/auth/logout'].some(path => path.startsWith(url))
+    if(isClient) { 
 
-        if(check) {
+        if(['/api/auth/login'].includes(url)) {
             const {accessToken, refreshToken} = (payload as LoginResType).data
             localStorage.setItem('accessToken', accessToken)
             localStorage.setItem('refreshToken', refreshToken)
-        } else if(checkLogout) {
+        } else if(['/api/auth/logout'].includes(url)) {
             localStorage.removeItem('accessToken')
             localStorage.removeItem('refreshToken')
         }
