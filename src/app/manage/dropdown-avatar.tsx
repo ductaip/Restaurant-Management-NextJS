@@ -36,7 +36,7 @@ export default function DropdownAvatar() {
       })
     }
   }
-  
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
