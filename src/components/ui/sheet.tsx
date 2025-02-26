@@ -68,6 +68,13 @@ const SheetContent = React.forwardRef<
         <X className="h-4 w-4" />
         <span className="sr-only">Close</span>
       </SheetPrimitive.Close>
+
+      {/* title */}
+      {React.Children.toArray(children).some(
+        (child) => React.isValidElement(child) && child.type === SheetTitle
+      ) ? null : (
+        <SheetTitle className="sr-only">Sheet</SheetTitle>
+      )}
       {children}
     </SheetPrimitive.Content>
   </SheetPortal>
