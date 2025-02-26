@@ -1,7 +1,5 @@
 import authApi from "@/apis/auth"
-import { LoginBodyType, LogoutBodyType } from "@/schemas/auth.schema"
 import { cookies } from "next/headers"
-import { HttpError } from "@/lib/http"
 
  
 export async function POST(request: Request) { 
@@ -14,7 +12,7 @@ export async function POST(request: Request) {
     if(!accessToken || !refreshToken) {
         console.log(accessToken, '>>>', refreshToken)
         return Response.json({
-            message: 'Missing accessToken or refreshToken'
+            message: 'AccessToken hoặc RefreshToken bị thiếu'
         }, {
             status: 200
         })
@@ -26,7 +24,7 @@ export async function POST(request: Request) {
         return Response.json(result.payload)
     } catch (error) { 
         return Response.json(
-            {message: `It's a error happing on logout`}, 
+            {message: `Có lỗi xảy ra trong quá trình logout`}, 
             {status: 200}
         )
     }

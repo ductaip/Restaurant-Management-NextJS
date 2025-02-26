@@ -14,6 +14,7 @@ import { useLogoutMutation } from '@/queries/useAuth'
 import { handleErrorApi } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import { useAccountProfile } from '@/queries/useAccount'
 
 const account = {
   name: 'Nguyen Van A',
@@ -23,12 +24,14 @@ const account = {
 export default function DropdownAvatar() { 
   const logoutMutation = useLogoutMutation()
   const router = useRouter()
+  const {data} = useAccountProfile()
+  const account = data?.payload.data
 
   const logout = async () => {
     if (logoutMutation.isPending) return
     try {
       await logoutMutation.mutateAsync()
-      toast.success("Logout successfully")
+      toast.success("Đăng xuất thành công")
       router.push('/')
     } catch (error: any) {
       handleErrorApi({

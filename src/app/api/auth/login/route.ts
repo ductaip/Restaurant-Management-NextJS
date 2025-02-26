@@ -40,7 +40,7 @@ export async function POST(request: Request) {
                 status: error.status
             })
         } else {
-            return Response.json({message: `It's a error happing`}, {status: 500})
+            return Response.json({message: `Có lỗi xảy ra khi login`}, {status: 500})
         }
     }
    
