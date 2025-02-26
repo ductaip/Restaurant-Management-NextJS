@@ -9,31 +9,14 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import Link from 'next/link'
-import { useLogoutMutation } from '@/queries/useAuth'
-import { handleErrorApi } from '@/lib/utils'
-import { useRouter } from 'next/navigation'
-import { useAccountMe } from '@/queries/useAccount'
-import { useAppContext } from '@/components/app-provider'
+import Link from 'next/link' 
 
-export default function DropdownAvatar() {
-  const logoutMutation = useLogoutMutation()
-  const router = useRouter()
-  const { data } = useAccountMe()
-  const { setRole } = useAppContext()
-  const account = data?.payload.data
-  const logout = async () => {
-    if (logoutMutation.isPending) return
-    try {
-      await logoutMutation.mutateAsync()
-      setRole()
-      router.push('/')
-    } catch (error: any) {
-      handleErrorApi({
-        error
-      })
-    }
-  }
+const account = {
+  name: 'Nguyen Van A',
+  avatar: 'https://i.pravatar.cc/150'
+}
+
+export default function DropdownAvatar() { 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -63,7 +46,7 @@ export default function DropdownAvatar() {
         </DropdownMenuItem>
         <DropdownMenuItem>Hỗ trợ</DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={logout}>Đăng xuất</DropdownMenuItem>
+        <DropdownMenuItem>Đăng xuất</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )
