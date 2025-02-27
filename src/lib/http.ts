@@ -132,6 +132,7 @@ const request = async <Response>(
                 }
             } else {
                 const accessToken = (options?.headers as any)?.Authorization.split(' ')[1]
+                console.log('run on it')
                 redirect(`/logout?accessToken=${accessToken}`)
             }
         } else {

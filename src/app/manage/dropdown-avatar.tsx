@@ -15,11 +15,7 @@ import { handleErrorApi } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { useAccountProfile } from '@/queries/useAccount'
-
-const account = {
-  name: 'Nguyen Van A',
-  avatar: 'https://i.pravatar.cc/150'
-}
+ 
 
 export default function DropdownAvatar() { 
   const logoutMutation = useLogoutMutation()
