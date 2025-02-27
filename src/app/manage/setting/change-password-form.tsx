@@ -7,15 +7,11 @@ import { useForm } from 'react-hook-form'
 import {
   ChangePasswordBody,
   ChangePasswordBodyType
-} from '@/schemaValidations/account.schema'
+} from '@/schemas/account.schema'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Form, FormField, FormItem, FormMessage } from '@/components/ui/form'
-import { useChangePasswordMutation } from '@/queries/useAccount'
-import { toast } from '@/components/ui/use-toast'
-import { handleErrorApi } from '@/lib/utils'
+import { Form, FormField, FormItem, FormMessage } from '@/components/ui/form' 
 
-export default function ChangePasswordForm() {
-  const changePasswordMutation = useChangePasswordMutation()
+export default function ChangePasswordForm() { 
   const form = useForm<ChangePasswordBodyType>({
     resolver: zodResolver(ChangePasswordBody),
     defaultValues: {
@@ -25,18 +21,7 @@ export default function ChangePasswordForm() {
     }
   })
   const onSubmit = async (data: ChangePasswordBodyType) => {
-    if (changePasswordMutation.isPending) return
-    try {
-      const result = await changePasswordMutation.mutateAsync(data)
-      toast({
-        description: result.payload.message
-      })
-    } catch (error) {
-      handleErrorApi({
-        error,
-        setError: form.setError
-      })
-    }
+     
   }
 
   const reset = () => {
