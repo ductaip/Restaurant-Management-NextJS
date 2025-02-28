@@ -12,8 +12,10 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Form, FormField, FormItem, FormMessage } from '@/components/ui/form'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar' 
+import { useRef } from 'react'
 
 export default function UpdateProfileForm() { 
+  const fileRef = useRef<HTMLInputElement>(null)
   const form = useForm<UpdateMeBodyType>({
     resolver: zodResolver(UpdateMeBody),
     defaultValues: {
@@ -24,6 +26,7 @@ export default function UpdateProfileForm() {
   const onSubmit = async (values: UpdateMeBodyType) => {
      
   }
+ 
   return (
     <Form {...form}>
       <form
@@ -51,9 +54,11 @@ export default function UpdateProfileForm() {
                           test
                         </AvatarFallback>
                       </Avatar> 
+                      <input type="file" ref={fileRef} name="" id="" className='hidden' />
                       <button
                         className='flex aspect-square w-[100px] items-center justify-center rounded-md border border-dashed'
                         type='button'
+                        onClick={() => fileRef.current?.click()}
                       >
                         <Upload className='h-4 w-4 text-muted-foreground' />
                         <span className='sr-only'>Upload</span>
