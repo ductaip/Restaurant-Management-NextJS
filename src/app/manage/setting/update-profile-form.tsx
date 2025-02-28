@@ -13,13 +13,19 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Form, FormField, FormItem, FormMessage } from '@/components/ui/form'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar' 
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useAccountProfile } from '@/queries/useAccount'
+import { useAccountProfile, useUpdatePersonalProfileMutation } from '@/queries/useAccount'
+import { useUploadMediaMutation } from '@/queries/useMedia'
+import { toast } from 'sonner'
+import { handleErrorApi } from '@/lib/utils'
 
 export default function UpdateProfileForm() { 
   const fileRef = useRef<HTMLInputElement>(null)
   const [file, setFile] = useState<File | null>(null)
-  const {data} = useAccountProfile()
+  const {data, refetch} = useAccountProfile()
+  const updateProfileMutation = useUpdatePersonalProfileMutation()
+  const uploadAvtMutation = useUploadMediaMutation()
 
+  //useform
   const form = useForm<UpdateMeBodyType>({
     resolver: zodResolver(UpdateMeBody),
     defaultValues: {
@@ -51,7 +57,28 @@ export default function UpdateProfileForm() {
   }
 
   const onSubmit = async (values: UpdateMeBodyType) => {
-    
+    if(updateProfileMutation.isPending) return
+    try {
+      let body = values
+      if(file) {
+        const formData = new FormData()
+        formData.append('file', file as Blob)
+        const uploadAvtResult = await uploadAvtMutation.mutateAsync(formData)
+        const imageUrl = uploadAvtResult.payload.data
+        body = {
+          ...values,
+          avatar: imageUrl
+        }
+      }
+      const result = await updateProfileMutation.mutateAsync(body)
+      toast.success("Update personal profile successfully")
+      refetch()
+    } catch (error) {
+      handleErrorApi({
+        error,
+        setError: form.setError
+      })
+    }
   }
  
   return (
@@ -85,7 +112,10 @@ export default function UpdateProfileForm() {
                       <input type="file" ref={fileRef} className='hidden' 
                         onChange={(e) => {
                           const fileFromLocal = e.target.files?.[0]
-                          if(fileFromLocal) setFile(fileFromLocal)
+                          if(fileFromLocal) {
+                            setFile(fileFromLocal)
+                            field.onChange('http://localhost:3000/' + field.name)
+                          }
                         }} 
                       />
                       <button
