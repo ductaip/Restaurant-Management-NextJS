@@ -1,8 +1,9 @@
 import http from '@/lib/http'
-import { AccountResType } from '@/schemas/account.schema'
+import { AccountResType, UpdateMeBodyType } from '@/schemas/account.schema'
 
 const accountApi = {
-    getAccount: () => http.get<AccountResType>('/accounts/me')
+    getPersonalAccount: () => http.get<AccountResType>('/accounts/me'),
+    updatePersonalAccount: (body: UpdateMeBodyType) => http.put<AccountResType>('/accounts/me', body)
 }
 
 export default accountApi
