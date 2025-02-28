@@ -12,10 +12,12 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Form, FormField, FormItem, FormMessage } from '@/components/ui/form'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar' 
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 
 export default function UpdateProfileForm() { 
   const fileRef = useRef<HTMLInputElement>(null)
+  const [file, setFile] = useState<File>()
+  const previewAvatar = file ? URL.createObjectURL(file) : ''
   const form = useForm<UpdateMeBodyType>({
     resolver: zodResolver(UpdateMeBody),
     defaultValues: {
