@@ -14,3 +14,9 @@ export const useUpdatePersonalProfileMutation = () => {
         mutationFn: accountApi.updatePersonalAccount
     })
 }
+
+export const useChangePasswordMutation = () => {
+    return useMutation({
+        mutationFn: accountApi.changePassword
+    })
+}
