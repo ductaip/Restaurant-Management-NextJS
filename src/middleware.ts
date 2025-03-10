@@ -12,7 +12,7 @@ export function middleware(request: NextRequest) {
 
 
   if(privatePaths.some((path) => pathname.startsWith(path) && !isAuth))
-    return Response.redirect(new URL('/login', request.url))
+    return Response.redirect(new URL('/logout', request.url))
 
   if(unAuthPaths.some((path) => pathname.startsWith(path) && isAuth))
     return Response.redirect(new URL('/', request.url))
