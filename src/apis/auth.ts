@@ -1,5 +1,5 @@
 import http from "@/lib/http";
-import { LoginBodyType, LoginResType, LogoutBodyType } from "@/schemas/auth.schema";
+import { LoginBodyType, LoginResType, LogoutBodyType, RefreshTokenBodyType, RefreshTokenResType } from "@/schemas/auth.schema";
 
 const authApi = {
     sLogin: (body: LoginBodyType) => http.post<LoginResType>('/auth/login', body),
@@ -15,7 +15,10 @@ const authApi = {
             Authorization: `Bearer ${body.accessToken}`
         }
     }),
-    logout: () => http.post('/api/auth/logout', null, {baseUrl: ''})
+    logout: () => http.post('/api/auth/logout', null, {baseUrl: ''}),
+
+    sRefreshToken: (body: RefreshTokenBodyType) => http.post<RefreshTokenResType>('/auth/refresh-token', body), 
+    refreshToken: () => http.post<RefreshTokenResType>('/api/auth/refresh-token', null, { baseUrl: ''}), 
 }
 
 export default authApi
