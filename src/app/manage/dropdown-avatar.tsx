@@ -25,7 +25,6 @@ export default function DropdownAvatar() {
 
   const logout = async () => {
     if (logoutMutation.isPending) return
-    if (!confirm("Bạn có chắc chắn muốn đăng xuất?")) return;
     try {
       await logoutMutation.mutateAsync()
       toast.success("Đăng xuất thành công")

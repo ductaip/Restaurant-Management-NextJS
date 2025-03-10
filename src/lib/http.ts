@@ -131,6 +131,7 @@ const request = async <Response>(
                     
                 }
             } else {
+                //access token is valid (calling on route handler | server components) but server is error 401
                 const accessToken = (options?.headers as any)?.Authorization.split(' ')[1]
                 console.log('run on it')
                 redirect(`/logout?accessToken=${accessToken}`)
