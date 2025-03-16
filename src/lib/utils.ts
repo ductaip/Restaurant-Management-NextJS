@@ -46,7 +46,6 @@ export const checkAndRefreshToken = async (param?:{
   onError?: () => void
   onSuccess?: () => void
 }) => {
-  console.log('>>>')
   //check xem token còn hạn ko, 
   // ko nên đưa ra khỏi hàm.
   const accessToken = getAccessTokenFromLocalStorage()
@@ -61,7 +60,10 @@ export const checkAndRefreshToken = async (param?:{
       iat: number
   }
   //exp của token tính theo giây, new Date().getTime() thì ms
-  const now = Math.round(new Date().getTime() / 1000) 
+  //set cookie bi lech, vi the tru hao 1s
+  const now = (new Date().getTime() / 1000 ) - 1
+
+
   //refreshToken is expire then logout
   if(decodeRefreshToken.exp <= now) {
     removeTokensFromLocalStorage()

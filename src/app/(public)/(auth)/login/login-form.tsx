@@ -16,12 +16,21 @@ import { LoginBody, LoginBodyType } from '@/schemas/auth.schema'
 import { zodResolver } from '@hookform/resolvers/zod' 
 import { useLoginMutation } from '@/queries/useAuth'
 import { toast } from 'sonner'
-import { handleErrorApi } from '@/lib/utils'
-import { useRouter } from 'next/navigation'
+import { handleErrorApi, removeTokensFromLocalStorage } from '@/lib/utils'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useEffect } from 'react'
 
 export default function LoginForm() { 
   const loginMutation = useLoginMutation()
+  const searchParams = useSearchParams()
+  const clearTokens = searchParams.get('clearTokens')
   const router = useRouter()
+  
+  useEffect(() => {
+    if(clearTokens) removeTokensFromLocalStorage()
+  }, [clearTokens])
+
+
   const form = useForm<LoginBodyType>({
     resolver: zodResolver(LoginBody),
     defaultValues: {
