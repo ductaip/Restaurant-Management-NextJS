@@ -37,6 +37,10 @@ export const setAccessTokenToLocalStorage = (value: string) => isBrowser ? local
 
 export const setRefreshTokenToLocalStorage = (value: string) => isBrowser ? localStorage.setItem('refreshToken', value) : null
 
+export const removeTokensFromLocalStorage = () => {
+  isBrowser && localStorage.removeItem('accessToken') 
+  isBrowser && localStorage.removeItem('refreshToken')
+}
 
 export const checkAndRefreshToken = async (param?:{
   onError?: () => void
@@ -58,8 +62,11 @@ export const checkAndRefreshToken = async (param?:{
   }
   //exp của token tính theo giây, new Date().getTime() thì ms
   const now = Math.round(new Date().getTime() / 1000) 
-  //refreshToken is expire then stop
-  if(decodeRefreshToken.exp <= now) return
+  //refreshToken is expire then logout
+  if(decodeRefreshToken.exp <= now) {
+    removeTokensFromLocalStorage()
+    return param?.onError && param.onError()
+  }
   // example if access token has expire time that is 1h
   // check if there is 1/3 time (20p) left then refresh-token again
   // **leftTime = decodeAccessToken.exp - now 
