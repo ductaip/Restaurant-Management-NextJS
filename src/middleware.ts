@@ -22,8 +22,9 @@ export function middleware(request: NextRequest) {
 
   //chỉ check xem có acc hay ref_ hay ko chứ ko check có đúng ở server ko 
   if(privatePaths.some((path) => pathname.startsWith(path) && !accessToken && refreshToken)) {
-    const url = new URL('/logout', request.url)
+    const url = new URL('/refresh-token', request.url)
     url.searchParams.set('refreshToken', refreshToken as string)
+    url.searchParams.set('redirect', pathname)
     return Response.redirect(url)
   } 
   return NextResponse.next()

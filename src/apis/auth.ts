@@ -22,6 +22,7 @@ const authApi = {
     logout: () => http.post('/api/auth/logout', null, {baseUrl: ''}),
 
     sRefreshToken: (body: RefreshTokenBodyType) => http.post<RefreshTokenResType>('/auth/refresh-token', body), 
+    //don't let refreshToken is duplicated
     async refreshToken () {
         if(this.refreshTokenRequest) return this.refreshTokenRequest
         this.refreshTokenRequest = http.post<RefreshTokenResType>('/api/auth/refresh-token', null, { baseUrl: ''})
