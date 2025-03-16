@@ -5,7 +5,7 @@ import { getAccessTokenFromLocalStorage } from '@/lib/utils'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
-const menuItems = [
+const menuItems = [ 
   {
     title: 'Món ăn',
     href: '/menu'

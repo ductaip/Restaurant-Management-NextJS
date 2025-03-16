@@ -19,16 +19,20 @@ import { toast } from 'sonner'
 import { handleErrorApi, removeTokensFromLocalStorage } from '@/lib/utils'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect } from 'react'
+import { useAppContext } from '@/components/app-provider'
 
 export default function LoginForm() { 
   const loginMutation = useLoginMutation()
   const searchParams = useSearchParams()
   const clearTokens = searchParams.get('clearTokens')
-  const router = useRouter()
+    const {handleSetIsAuth} = useAppContext()
   
+  const router = useRouter()
+
   useEffect(() => {
-    if(clearTokens) removeTokensFromLocalStorage()
-  }, [clearTokens])
+    if(clearTokens) 
+      handleSetIsAuth(false)
+  }, [clearTokens, handleSetIsAuth])
 
 
   const form = useForm<LoginBodyType>({
@@ -44,8 +48,8 @@ export default function LoginForm() {
     try {
       const result = await loginMutation.mutateAsync(data)
       toast.success(result.payload.message)
+      handleSetIsAuth(true)
       router.push('/manage/dashboard')
-      console.log('....')
     } catch (error: any) {
       handleErrorApi({error, setError: form.setError})
     }

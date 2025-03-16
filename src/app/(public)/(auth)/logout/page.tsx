@@ -1,5 +1,6 @@
 'use client'
 
+import { useAppContext } from "@/components/app-provider"
 import { getAccessTokenFromLocalStorage, getRefreshTokenFromLocalStorage } from "@/lib/utils"
 import { useLogoutMutation } from "@/queries/useAuth"
 import { useRouter, useSearchParams } from "next/navigation"
@@ -12,19 +13,25 @@ export default function LogoutPage() {
     const {mutateAsync} = useLogoutMutation()
     const router = useRouter()
     const ref = useRef<any>(null)
+    const {handleSetIsAuth} = useAppContext()
+
     useEffect(() => {
         if(
-          ref.current || 
-          (refreshTokenFromUrl && refreshTokenFromUrl !== getRefreshTokenFromLocalStorage()) || 
-          (accessTokenFromUrl && accessTokenFromUrl !== getAccessTokenFromLocalStorage()) 
-        ) return
-        ref.current = mutateAsync
-        mutateAsync().then((res) => {
-            setTimeout(() => {
-                ref.current = null
-            }, 1000)
-            router.push('/login')
-        })
+          !ref.current (
+          (refreshTokenFromUrl && refreshTokenFromUrl === getRefreshTokenFromLocalStorage()) || 
+          (accessTokenFromUrl && accessTokenFromUrl !== getAccessTokenFromLocalStorage())
+        ) 
+        ) {
+          ref.current = mutateAsync
+          mutateAsync().then((res) => {
+              setTimeout(() => {
+                  ref.current = null
+              }, 1000)
+              handleSetIsAuth(false)
+              router.push('/login')
+          })
+        } else router.push('/')
+        
     }, [mutateAsync, router, refreshTokenFromUrl, accessTokenFromUrl])
     return (
       <div>

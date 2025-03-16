@@ -10,13 +10,14 @@ export default function RefreshTokenPage() {
     const redirectPathname = searchParams.get('redirect') 
     const router = useRouter()
     useEffect(() => {
-        if( refreshTokenFromUrl && refreshTokenFromUrl === getRefreshTokenFromLocalStorage()) 
-            checkAndRefreshToken({
-                onSuccess: () => {
-                    router.push(redirectPathname || '/')
-                }
-                //onError: () => {}   ko can xu ly, vi da handle o http
-            })
+        if( refreshTokenFromUrl && refreshTokenFromUrl === getRefreshTokenFromLocalStorage()) {
+          checkAndRefreshToken({
+              onSuccess: () => {
+                  router.push(redirectPathname || '/')
+              }
+              //onError: () => {}   ko can xu ly, vi da handle o http
+          })
+        } else router.push('/')
         
     }, [ router, refreshTokenFromUrl, redirectPathname ])
     return (
