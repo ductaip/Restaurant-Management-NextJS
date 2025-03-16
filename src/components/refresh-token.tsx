@@ -10,11 +10,11 @@ const UNAUTHENTICATED_PATH = ['/login', '/logout', '/refresh-token']
 
 export default function RefreshToken() {
     const pathname = usePathname()
-    console.log('>>>',pathname)
     useEffect(() => {
         if(UNAUTHENTICATED_PATH.includes(pathname)) return
         let interval: any = null
         const checkAndRefreshToken = async () => {
+            console.log('>>>')
             //check xem token còn hạn ko, 
             // ko nên đưa ra khỏi hàm.
             const accessToken = getAccessTokenFromLocalStorage()
@@ -40,6 +40,7 @@ export default function RefreshToken() {
                 //call refreshtoken api
                 try {
                     const result = await authApi.refreshToken()
+                    console.log('####',result.payload.data.accessToken)
                     setAccessTokenToLocalStorage(result.payload.data.accessToken)
                     setRefreshTokenToLocalStorage(result.payload.data.refreshToken)
                 } catch (error) {
@@ -53,6 +54,8 @@ export default function RefreshToken() {
         checkAndRefreshToken() 
         const TIMEOUT = 1000
         interval = setInterval(checkAndRefreshToken, TIMEOUT)
+
+        return () => clearInterval(interval)
     }, [pathname])
     return null 
 }
