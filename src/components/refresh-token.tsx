@@ -1,6 +1,6 @@
 'use client'
 
-import { getAccessTokenFromLocalStorage, getRefreshTokenFromLocalStorage } from "@/lib/utils"
+import { getAccessTokenFromLocalStorage, getRefreshTokenFromLocalStorage, setAccessTokenToLocalStorage, setRefreshTokenToLocalStorage } from "@/lib/utils"
 import { usePathname } from "next/navigation"
 import { useEffect } from "react"
 import jwt from 'jsonwebtoken'
@@ -40,14 +40,19 @@ export default function RefreshToken() {
                 //call refreshtoken api
                 try {
                     const result = await authApi.refreshToken()
-                    // setAcc
+                    setAccessTokenToLocalStorage(result.payload.data.accessToken)
+                    setRefreshTokenToLocalStorage(result.payload.data.refreshToken)
                 } catch (error) {
-                    
+                    clearInterval(interval)
                 }
             }
 
 
         }
+        //Must call for first time, as interval will run after TIMEOUT
+        checkAndRefreshToken() 
+        const TIMEOUT = 1000
+        interval = setInterval(checkAndRefreshToken, TIMEOUT)
     }, [pathname])
     return null 
 }
