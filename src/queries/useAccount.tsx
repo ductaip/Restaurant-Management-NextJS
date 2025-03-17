@@ -29,10 +29,11 @@ export const useGetAccountList = () => {
     })
 }
 
-export const useGetEmployee = ({id}: {id: number}) => {
+export const useGetEmployee = ({id, enabled}: {id: number, enabled: boolean}) => {
     return useQuery({
         queryKey: ['employee', id],
-        queryFn: () => accountApi.getEmployeeDetail(id)
+        queryFn: () => accountApi.getEmployeeDetail(id),
+        enabled
     })
 }
 

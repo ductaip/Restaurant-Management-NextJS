@@ -55,7 +55,7 @@ const accountApi = {
      */
     updateEmployee: (id: number, body: UpdateEmployeeAccountBodyType) => http.put<AccountResType>(`${PREFIX_ACCOUNT}/detail/${id}`, body),
 
-    getEmployeeDetail: (id: number) => http.get(`${PREFIX_ACCOUNT}/detail/${id}`),
+    getEmployeeDetail: (id: number) => http.get<AccountResType>(`${PREFIX_ACCOUNT}/detail/${id}`),
 
     deleteEmployee: (id: number) => http.delete<AccountResType>(`${PREFIX_ACCOUNT}/detail/${id}`)
 
