@@ -14,23 +14,17 @@ import { Label } from '@/components/ui/label'
 import {
   CreateEmployeeAccountBody,
   CreateEmployeeAccountBodyType
-} from '@/schemaValidations/account.schema'
+} from '@/schemas/account.schema'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { PlusCircle, Upload } from 'lucide-react'
 import { useMemo, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Form, FormField, FormItem, FormMessage } from '@/components/ui/form'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { useAddAccountMutation } from '@/queries/useAccount'
-import { useUploadMediaMutation } from '@/queries/useMedia'
-import { toast } from '@/components/ui/use-toast'
-import { handleErrorApi } from '@/lib/utils'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar' 
 
 export default function AddEmployee() {
   const [file, setFile] = useState<File | null>(null)
-  const [open, setOpen] = useState(false)
-  const addAccountMutation = useAddAccountMutation()
-  const uploadMediaMutation = useUploadMediaMutation()
+  const [open, setOpen] = useState(false) 
 
   const avatarInputRef = useRef<HTMLInputElement | null>(null)
   const form = useForm<CreateEmployeeAccountBodyType>({
@@ -56,34 +50,8 @@ export default function AddEmployee() {
     form.reset()
     setFile(null)
   }
-  const onSubmit = async (values: CreateEmployeeAccountBodyType) => {
-    if (addAccountMutation.isPending) return
-    try {
-      let body = values
-      if (file) {
-        const formData = new FormData()
-        formData.append('file', file)
-        const uploadImageResult = await uploadMediaMutation.mutateAsync(
-          formData
-        )
-        const imageUrl = uploadImageResult.payload.data
-        body = {
-          ...values,
-          avatar: imageUrl
-        }
-      }
-      const result = await addAccountMutation.mutateAsync(body)
-      toast({
-        description: result.payload.message
-      })
-      reset()
-      setOpen(false)
-    } catch (error) {
-      handleErrorApi({
-        error,
-        setError: form.setError
-      })
-    }
+  const onSubmit = async (values: CreateEmployeeAccountBodyType) => { 
+    
   }
   return (
     <Dialog onOpenChange={setOpen} open={open}>

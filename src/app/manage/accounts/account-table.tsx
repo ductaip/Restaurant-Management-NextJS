@@ -1,6 +1,6 @@
 'use client'
 
-import { CaretSortIcon, DotsHorizontalIcon } from '@radix-ui/react-icons'
+// import { CaretSortIcon, DotsHorizontalIcon } from '@radix-ui/react-icons'
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -36,7 +36,7 @@ import {
 import {
   AccountListResType,
   AccountType
-} from '@/schemaValidations/account.schema'
+} from '@/schemas/account.schema'
 import AddEmployee from '@/app/manage/accounts/add-employee'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import EditEmployee from '@/app/manage/accounts/edit-employee'
@@ -52,13 +52,7 @@ import {
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
 import { useSearchParams } from 'next/navigation'
-import AutoPagination from '@/components/auto-pagination'
-import {
-  useDeleteAccountMutation,
-  useGetAccountList
-} from '@/queries/useAccount'
-import { toast } from '@/components/ui/use-toast'
-import { handleErrorApi } from '@/lib/utils'
+import AutoPagination from '@/components/auto-pagination' 
 
 type AccountItem = AccountListResType['data'][0]
 
