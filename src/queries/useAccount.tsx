@@ -1,5 +1,6 @@
 import accountApi from "@/apis/account"
-import { AccountResType } from "@/schemas/account.schema"
+import { queryClient } from "@/components/app-provider"
+import { UpdateEmployeeAccountBodyType } from "@/schemas/account.schema"
 import { useMutation, useQuery } from "@tanstack/react-query"
 
 export const useAccountProfile = () => {
@@ -18,5 +19,46 @@ export const useUpdatePersonalProfileMutation = () => {
 export const useChangePasswordMutation = () => {
     return useMutation({
         mutationFn: accountApi.changePassword
+    })
+}
+
+export const useGetAccountList = () => {
+    return useQuery({
+        queryKey: ['accounts'],
+        queryFn: accountApi.getListAccount
+    })
+}
+
+export const useGetEmployee = ({id}: {id: number}) => {
+    return useQuery({
+        queryKey: ['employee', id],
+        queryFn: () => accountApi.getEmployeeDetail(id)
+    })
+}
+
+export const useCreateEmployeeMutation = () => {
+    return useMutation({
+        mutationFn: accountApi.createEmployee,
+        onSuccess: () => {
+            queryClient.invalidateQueries({queryKey: ['accounts']})
+        }
+    })
+}
+
+export const useUpdateAccountMutation = () => {
+    return useMutation({
+        mutationFn: ({id, ...body}: UpdateEmployeeAccountBodyType & {id: number}) => accountApi.updateEmployee(id, body),
+        onSuccess: () => {
+            queryClient.invalidateQueries({queryKey: ['accounts']})
+        }
+    })
+}
+
+export const useDeleteEmployeeMutation = () => {
+    return useMutation({
+        mutationFn: accountApi.deleteEmployee,
+        onSuccess: () => {
+            queryClient.invalidateQueries({queryKey: ['accounts']})
+        }
     })
 }

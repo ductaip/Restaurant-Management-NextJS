@@ -9,7 +9,7 @@ import { createContext, useContext, useEffect, useState } from 'react'
 import { getAccessTokenFromLocalStorage, removeTokensFromLocalStorage } from '@/lib/utils'
 
   // Create a client
-const queryClient = new QueryClient({
+export const queryClient = new QueryClient({
     defaultOptions: {
         queries: {
             refetchOnWindowFocus: false,
