@@ -9,11 +9,14 @@ import { useMemo, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { getVietnameseDishStatus } from '@/lib/utils'
+import { getVietnameseDishStatus, handleErrorApi } from '@/lib/utils'
 import { CreateDishBody, CreateDishBodyType } from '@/schemas/dish.schema'
 import { DishStatus, DishStatusValues } from '@/constants/type'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
+import { useCreateDishMutation } from '@/queries/useDish'
+import { useUploadMediaMutation } from '@/queries/useMedia'
+import { toast } from 'sonner'
 
 export default function AddDish() {
   const [file, setFile] = useState<File | null>(null)
@@ -25,10 +28,13 @@ export default function AddDish() {
       name: '',
       description: '',
       price: 0,
-      image: '',
+      image: undefined,
       status: DishStatus.Unavailable
     }
   })
+  const createDishMutation = useCreateDishMutation()
+  const uploadImageMutation = useUploadMediaMutation()
+
   const image = form.watch('image')
   const name = form.watch('name')
   const previewAvatarFromFile = useMemo(() => {
@@ -38,8 +44,42 @@ export default function AddDish() {
     return image
   }, [file, image])
 
+  const reset = () => {
+    form.reset()
+    setFile(null)
+  }
+
+  const onSubmit = async (values: CreateDishBodyType) => {
+    if(createDishMutation.isPending) return
+    try {
+      let body = values
+      if(file) {
+        const formData = new FormData()
+        formData.append('file', file)
+        const resImg = await uploadImageMutation.mutateAsync(formData)
+        const imageUrl = resImg.payload.data 
+        body = {...body, image: imageUrl}
+      }
+      const result = await createDishMutation.mutateAsync(body)
+      toast.success('You have created new dish successfully')
+      reset()
+      setOpen(false)
+    } catch (error) {
+      handleErrorApi({
+        error,
+        setError: form.setError
+      })
+    }
+  }
+
   return (
-    <Dialog onOpenChange={setOpen} open={open}>
+    <Dialog onOpenChange={value => {
+      if(!value) {
+        reset()
+      }
+      setOpen(value)
+      
+    }} open={open}>
       <DialogTrigger asChild>
         <Button size='sm' className='h-7 gap-1'>
           <PlusCircle className='h-3.5 w-3.5' />
@@ -51,7 +91,14 @@ export default function AddDish() {
           <DialogTitle>Thêm món ăn</DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form noValidate className='grid auto-rows-max items-start gap-4 md:gap-8' id='add-dish-form'>
+          <form 
+            onSubmit={form.handleSubmit(onSubmit, (e) => {
+              console.warn(e)
+            })}
+            noValidate 
+            className='grid auto-rows-max items-start gap-4 md:gap-8' 
+            id='add-dish-form'
+          >
             <div className='grid gap-4 py-4'>
               <FormField
                 control={form.control}
@@ -61,7 +108,7 @@ export default function AddDish() {
                     <div className='flex gap-2 items-start justify-start'>
                       <Avatar className='aspect-square w-[100px] h-[100px] rounded-md object-cover'>
                         <AvatarImage src={previewAvatarFromFile} />
-                        <AvatarFallback className='rounded-none'>{name || 'Avatar'}</AvatarFallback>
+                        <AvatarFallback className='rounded-none'>{name || 'Ảnh món ăn'}</AvatarFallback>
                       </Avatar>
                       <input
                         type='file'
