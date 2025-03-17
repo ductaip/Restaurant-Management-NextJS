@@ -40,7 +40,7 @@ import {
 import { formatCurrency, getVietnameseDishStatus } from '@/lib/utils'
 import { useSearchParams } from 'next/navigation'
 import AutoPagination from '@/components/auto-pagination'
-import { DishListResType } from '@/schemaValidations/dish.schema'
+import { DishListResType } from '@/schemas/dish.schema'
 import EditDish from '@/app/manage/dishes/edit-dish'
 import AddDish from '@/app/manage/dishes/add-dish'
 
