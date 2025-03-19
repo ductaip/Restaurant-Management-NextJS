@@ -24,7 +24,7 @@ export const useGetTableQuery = ({
   })
 }
 
-export const useAddTableMutation = () => {
+export const useCreateTableMutation = () => {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: tableApiRequest.createTable,
