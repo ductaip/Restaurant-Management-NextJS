@@ -15,7 +15,10 @@ const eslintConfig = [
     rules: {
       "no-unused-vars": "off", // Disable the rule
     },
-    extends: ["plugin:@tanstack/query/recommended"]
+    extends: [
+      "next/core-web-vitals",,
+      "plugin:@tanstack/query/recommended"
+    ]
   },
 ];
 
