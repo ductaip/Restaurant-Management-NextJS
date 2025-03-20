@@ -59,13 +59,11 @@ A modern, **performance-optimized restaurant management system** built with **Ne
   - Next.js (React Framework)
   - Tailwind CSS
   - ShadCNUI (for advanced UI components)
-  - React (UI components)
+  - Tanstack Table
   - Socket.io (for real-time communication)
   - TypeScript (for type safety and maintainability)
-
-- **Backend**: 
-  - Node.js (via Next.js API routes)
-  - Socket.io (for real-time communication)
+  - React Tanstack, Zustand
+ 
 
 - **Performance Optimization**:
   - **Static Site Generation (SSG)**
