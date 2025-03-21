@@ -10,15 +10,12 @@ const compat = new FlatCompat({
 });
 
 const eslintConfig = [
-  ...compat.extends("next/core-web-vitals", "next/typescript"), 
+  ...compat.extends("next/core-web-vitals", "next/typescript"),
   {
     rules: {
       "no-unused-vars": "off", // Disable the rule
     },
-    extends: [
-      "next/core-web-vitals",,
-      "plugin:@tanstack/query/recommended"
-    ]
+    extends: ["next/core-web-vitals", , "plugin:@tanstack/query/recommended"],
   },
 ];
 
