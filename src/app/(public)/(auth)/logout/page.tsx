@@ -1,43 +1,43 @@
-'use client'
+"use client";
 
-import { useAppContext } from "@/components/app-provider"
-import { getAccessTokenFromLocalStorage, getRefreshTokenFromLocalStorage } from "@/lib/utils"
-import { useLogoutMutation } from "@/queries/useAuth"
-import { useRouter, useSearchParams } from "next/navigation"
-import { Suspense, useEffect, useRef } from "react"
+import { useAppContext } from "@/components/app-provider";
+import {
+  getAccessTokenFromLocalStorage,
+  getRefreshTokenFromLocalStorage,
+} from "@/lib/utils";
+import { useLogoutMutation } from "@/queries/useAuth";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useRef } from "react";
 
 function Logout() {
-  const searchParams = useSearchParams()
-    const refreshTokenFromUrl = searchParams.get('refreshToken')
-    const accessTokenFromUrl = searchParams.get('accessToken')
-    const {mutateAsync} = useLogoutMutation()
-    const router = useRouter()
-    const ref = useRef<any>(null)
-    const {handleSetIsAuth} = useAppContext()
+  const searchParams = useSearchParams();
+  const refreshTokenFromUrl = searchParams.get("refreshToken");
+  const accessTokenFromUrl = searchParams.get("accessToken");
+  const { mutateAsync } = useLogoutMutation();
+  const router = useRouter();
+  const ref = useRef<any>(null);
+  const { setRole } = useAppContext();
 
-    useEffect(() => {
-        if(
-          !ref.current (
-          (refreshTokenFromUrl && refreshTokenFromUrl === getRefreshTokenFromLocalStorage()) || 
-          (accessTokenFromUrl && accessTokenFromUrl !== getAccessTokenFromLocalStorage())
-        ) 
-        ) {
-          ref.current = mutateAsync
-          mutateAsync().then((res) => {
-              setTimeout(() => {
-                  ref.current = null
-              }, 1000)
-              handleSetIsAuth(false)
-              router.push('/login')
-          })
-        } else router.push('/')
-        
-    }, [mutateAsync, router, refreshTokenFromUrl, accessTokenFromUrl, handleSetIsAuth])
-    return (
-      <div>
-        Logout......
-      </div>
-    )
+  useEffect(() => {
+    if (
+      !ref.current(
+        (refreshTokenFromUrl &&
+          refreshTokenFromUrl === getRefreshTokenFromLocalStorage()) ||
+          (accessTokenFromUrl &&
+            accessTokenFromUrl !== getAccessTokenFromLocalStorage())
+      )
+    ) {
+      ref.current = mutateAsync;
+      mutateAsync().then((res) => {
+        setTimeout(() => {
+          ref.current = null;
+        }, 1000);
+        setRole(undefined);
+        router.push("/login");
+      });
+    } else router.push("/");
+  }, [mutateAsync, router, refreshTokenFromUrl, accessTokenFromUrl, setRole]);
+  return <div>Logout......</div>;
 }
 
 export default function LogoutPage() {
@@ -45,5 +45,5 @@ export default function LogoutPage() {
     <Suspense fallback={<div>Loading...</div>}>
       <Logout />
     </Suspense>
-  )
+  );
 }

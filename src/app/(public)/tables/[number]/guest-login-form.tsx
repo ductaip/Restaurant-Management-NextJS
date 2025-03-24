@@ -10,8 +10,11 @@ import { GuestLoginBody, GuestLoginBodyType } from "@/schemas/guest.schema";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { useGuestLoginMutation } from "@/queries/useGuest";
+import { useAppContext } from "@/components/app-provider";
+import { handleErrorApi } from "@/lib/utils";
 
 export default function GuestLoginForm() {
+  const { setRole } = useAppContext();
   const searchParams = useSearchParams();
   const params = useParams();
   const loginMutation = useGuestLoginMutation();
@@ -36,8 +39,13 @@ export default function GuestLoginForm() {
     if (loginMutation.isPending) return;
     try {
       const result = await loginMutation.mutateAsync(values);
+      setRole(result?.payload?.data?.guest.role);
+      router.push("/guest/menu");
     } catch (error) {
-      console.log(error);
+      handleErrorApi({
+        error,
+        setError: form.setError,
+      });
     }
   }
 

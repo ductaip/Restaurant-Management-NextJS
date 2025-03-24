@@ -9,6 +9,7 @@ import {
   removeTokensFromLocalStorage,
 } from "@/lib/utils";
 import { RoleType } from "@/types/jwt.types";
+import { boolean } from "zod";
 
 // Create a client
 export const queryClient = new QueryClient({
@@ -21,6 +22,7 @@ export const queryClient = new QueryClient({
 });
 
 const AppContext = createContext({
+  isAuth: false,
   role: undefined as RoleType | undefined,
   setRole: (role?: RoleType | undefined) => {},
 });
@@ -48,9 +50,10 @@ export default function AppProvider({
     setRoleState(role);
     if (!role) removeTokensFromLocalStorage();
   };
+  const isAuth = Boolean(role);
   //react19 and nextjs 15 don't need AppContext.Provider
   return (
-    <AppContext value={{ role, setRole }}>
+    <AppContext value={{ role, setRole, isAuth }}>
       <QueryClientProvider client={queryClient}>
         {children}
         <RefreshToken />
