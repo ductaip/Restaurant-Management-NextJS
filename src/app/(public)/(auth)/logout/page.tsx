@@ -20,12 +20,11 @@ function Logout() {
 
   useEffect(() => {
     if (
-      !ref.current(
-        (refreshTokenFromUrl &&
-          refreshTokenFromUrl === getRefreshTokenFromLocalStorage()) ||
-          (accessTokenFromUrl &&
-            accessTokenFromUrl !== getAccessTokenFromLocalStorage())
-      )
+      !ref.current &&
+      ((refreshTokenFromUrl &&
+        refreshTokenFromUrl === getRefreshTokenFromLocalStorage()) ||
+        (accessTokenFromUrl &&
+          accessTokenFromUrl !== getAccessTokenFromLocalStorage()))
     ) {
       ref.current = mutateAsync;
       mutateAsync().then((res) => {

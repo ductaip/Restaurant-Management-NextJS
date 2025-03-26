@@ -5,9 +5,10 @@ import { EntityError } from "./http";
 import { toast } from "sonner";
 import jwt from "jsonwebtoken";
 import authApi from "@/apis/auth";
-import { DishStatus, OrderStatus, TableStatus } from "@/constants/type";
+import { DishStatus, OrderStatus, Role, TableStatus } from "@/constants/type";
 import envConfig from "@/config";
 import { TokenPayload } from "@/types/jwt.types";
+import guestApi from "@/apis/guest";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -83,8 +84,12 @@ export const checkAndRefreshToken = async (param?: {
   ) {
     //call refreshtoken api
     try {
-      const result = await authApi.refreshToken();
-      console.log("####", result.payload.data.accessToken);
+      const role = decodeRefreshToken.role;
+      const result =
+        role === Role.Guest
+          ? await guestApi.refreshToken()
+          : await authApi.refreshToken();
+      // console.log("####", result.payload.data.accessToken);
       setAccessTokenToLocalStorage(result.payload.data.accessToken);
       setRefreshTokenToLocalStorage(result.payload.data.refreshToken);
       param?.onSuccess && param.onSuccess();
