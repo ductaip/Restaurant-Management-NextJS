@@ -1,12 +1,32 @@
 "use client";
 import Image from "next/image";
-import { Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useDishListQuery } from "@/queries/useDish";
+import Quantity from "./quantity";
+import { useState } from "react";
+import { GuestCreateOrdersBodyType } from "@/schemas/guest.schema";
 
 export default function MenuOrder() {
   const { data: listData } = useDishListQuery();
+  const dishes = listData?.payload.data ?? [];
+  const [orders, setOrders] = useState<GuestCreateOrdersBodyType>([]);
+
+  const handleQuantityChange = (dishId: number, quantity: number) => {
+    setOrders((prev) => {
+      if (quantity === 0) {
+        return prev.filter((order) => order.dishId !== dishId);
+      }
+      const index = prev.findIndex((order) => order.dishId === dishId);
+      if (index === -1) {
+        return [...prev, { dishId, quantity }];
+      }
+
+      const newOrders = [...prev];
+      newOrders[index] = { ...newOrders[index], quantity };
+      return newOrders;
+    });
+  };
+
   return (
     <>
       {listData?.payload?.data.map((dish) => (
@@ -29,15 +49,12 @@ export default function MenuOrder() {
             </p>
           </div>
           <div className="flex-shrink-0 ml-auto flex justify-center items-center">
-            <div className="flex gap-1 ">
-              <Button className="h-6 w-6 p-0">
-                <Minus className="w-3 h-3" />
-              </Button>
-              <Input type="text" readOnly className="h-6 p-1 w-8" />
-              <Button className="h-6 w-6 p-0">
-                <Plus className="w-3 h-3" />
-              </Button>
-            </div>
+            <Quantity
+              onChange={(value) => handleQuantityChange(dish.id, value)}
+              value={
+                orders.find((order) => order.dishId === dish.id)?.quantity ?? 0
+              }
+            />
           </div>
         </div>
       ))}
