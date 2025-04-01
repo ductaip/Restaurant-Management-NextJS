@@ -5,12 +5,21 @@ import { useDishListQuery } from "@/queries/useDish";
 import Quantity from "./quantity";
 import { useState } from "react";
 import { GuestCreateOrdersBodyType } from "@/schemas/guest.schema";
+import { useGuestOrderMutation } from "@/queries/useGuest";
+import { useRouter } from "next/navigation";
+import { handleErrorApi } from "@/lib/utils";
 
 export default function MenuOrder() {
   const { data: listData } = useDishListQuery();
   const dishes = listData?.payload.data ?? [];
+  const { mutateAsync } = useGuestOrderMutation();
   const [orders, setOrders] = useState<GuestCreateOrdersBodyType>([]);
-
+  const totalPrice = dishes.reduce((result, dish) => {
+    const order = orders.find((order) => order.dishId === dish.id);
+    if (!order) return result;
+    return result + order.quantity * dish.price;
+  }, 0);
+  const router = useRouter();
   const handleQuantityChange = (dishId: number, quantity: number) => {
     setOrders((prev) => {
       if (quantity === 0) {
@@ -27,9 +36,20 @@ export default function MenuOrder() {
     });
   };
 
+  const handleOrder = async () => {
+    try {
+      await mutateAsync(orders);
+      router.push(`/guest/orders`);
+    } catch (error) {
+      handleErrorApi({
+        error,
+      });
+    }
+  };
+
   return (
     <>
-      {listData?.payload?.data.map((dish) => (
+      {dishes.map((dish) => (
         <div key={dish.id} className="flex gap-4">
           <div className="flex-shrink-0">
             <Image
@@ -59,9 +79,13 @@ export default function MenuOrder() {
         </div>
       ))}
       <div className="sticky bottom-0">
-        <Button className="w-full justify-between">
-          <span>Giỏ hàng · 2 món</span>
-          <span>100,000 đ</span>
+        <Button
+          className="w-full justify-between"
+          onClick={handleOrder}
+          disabled={orders.length === 0}
+        >
+          <span>Đặt hàng · {orders.length} món</span>
+          <span>{totalPrice && totalPrice.toLocaleString("VN")}đ</span>
         </Button>
       </div>
     </>
