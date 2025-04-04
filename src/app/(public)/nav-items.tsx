@@ -22,12 +22,12 @@ const menuItems: menuType[] = [
     href: "/",
   },
   {
-    title: "Order",
+    title: "Đơn hàng",
     href: "/guest/orders",
     role: [Role.Guest],
   },
   {
-    title: "Đơn hàng",
+    title: "Menu",
     href: "/guest/menu",
     role: [Role.Guest],
   },
