@@ -1,12 +1,67 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
+import socket from "@/lib/socket";
+import { getVietnameseOrderStatus } from "@/lib/utils";
 import { useGuestGetOrderListMutation } from "@/queries/useGuest";
+import {
+  PayGuestOrdersResType,
+  UpdateOrderResType,
+} from "@/schemas/order.schema";
 import Image from "next/image";
+import { useEffect, useMemo } from "react";
+import { toast } from "sonner";
 
 export default function OrdersCart() {
-  const { data } = useGuestGetOrderListMutation();
-  const orders = data?.payload.data ?? [];
+  const { refetch, data } = useGuestGetOrderListMutation();
+  const orders = useMemo(() => data?.payload.data ?? [], [data]);
+
+  useEffect(() => {
+    if (socket.connected) {
+      onConnect();
+    }
+
+    function onConnect() {
+      console.log(socket.id);
+    }
+
+    function onDisconnect() {
+      console.log("disconnect");
+    }
+
+    function onUpdateOrder(data: UpdateOrderResType["data"]) {
+      const {
+        dishSnapshot: { name },
+        quantity,
+      } = data;
+      toast(
+        `Món ${name} (SL: ${quantity}) vừa được cập nhật sang trạng thái "${getVietnameseOrderStatus(
+          data.status
+        )}"`
+      );
+      refetch();
+    }
+
+    function onPayment(data: PayGuestOrdersResType["data"]) {
+      const { guest } = data[0];
+      toast(
+        `${guest?.name} tại bàn ${guest?.tableNumber} thanh toán thành công ${data.length} đơn`
+      );
+      refetch();
+    }
+
+    socket.on("update-order", onUpdateOrder);
+    socket.on("payment", onPayment);
+    socket.on("connect", onConnect);
+    socket.on("disconnect", onDisconnect);
+
+    return () => {
+      socket.off("connect", onConnect);
+      socket.off("disconnect", onDisconnect);
+      socket.off("update-order", onUpdateOrder);
+      socket.off("payment", onPayment);
+    };
+  }, [refetch]);
   return (
     <div>
       {orders.map((order) => (
@@ -32,6 +87,11 @@ export default function OrdersCart() {
               {order.dishSnapshot.price.toLocaleString("VN")}đ x
               <Badge className="px-1.5 ml-2"> {order.quantity}</Badge>
             </div>
+          </div>
+          <div className="flex-shrink-0 ml-auto flex justify-center items-center">
+            <Badge variant={"outline"}>
+              {getVietnameseOrderStatus(order.status)}
+            </Badge>
           </div>
         </div>
       ))}
