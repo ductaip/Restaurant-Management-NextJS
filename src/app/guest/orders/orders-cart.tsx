@@ -1,8 +1,9 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
+import { OrderStatus } from "@/constants/type";
 import socket from "@/lib/socket";
-import { getVietnameseOrderStatus } from "@/lib/utils";
+import { formatCurrency, getVietnameseOrderStatus } from "@/lib/utils";
 import { useGuestGetOrderListMutation } from "@/queries/useGuest";
 import {
   PayGuestOrdersResType,
@@ -15,6 +16,49 @@ import { toast } from "sonner";
 export default function OrdersCart() {
   const { refetch, data } = useGuestGetOrderListMutation();
   const orders = useMemo(() => data?.payload.data ?? [], [data]);
+
+  const { waitingForPaying, paid } = useMemo(() => {
+    return orders.reduce(
+      (result, order) => {
+        if (
+          order.status === OrderStatus.Delivered ||
+          order.status === OrderStatus.Processing ||
+          order.status === OrderStatus.Pending
+        ) {
+          return {
+            ...result,
+            waitingForPaying: {
+              price:
+                result.waitingForPaying.price +
+                order.dishSnapshot.price * order.quantity,
+              quantity: result.waitingForPaying.quantity + order.quantity,
+            },
+          };
+        }
+        if (order.status === OrderStatus.Paid) {
+          return {
+            ...result,
+            paid: {
+              price:
+                result.paid.price + order.dishSnapshot.price * order.quantity,
+              quantity: result.paid.quantity + order.quantity,
+            },
+          };
+        }
+        return result;
+      },
+      {
+        waitingForPaying: {
+          price: 0,
+          quantity: 0,
+        },
+        paid: {
+          price: 0,
+          quantity: 0,
+        },
+      }
+    );
+  }, [orders]);
 
   useEffect(() => {
     if (socket.connected) {
@@ -30,6 +74,7 @@ export default function OrdersCart() {
     }
 
     function onUpdateOrder(data: UpdateOrderResType["data"]) {
+      console.log("update-order", data);
       const {
         dishSnapshot: { name },
         quantity,
@@ -95,6 +140,21 @@ export default function OrdersCart() {
           </div>
         </div>
       ))}
+
+      {paid.quantity !== 0 && (
+        <div className="sticky bottom-0 mt-8">
+          <div className="w-full flex justify-between space-x-4 text-lg font-semibold">
+            <span>Đã thanh toán · {paid.quantity} món</span>
+            <span>{formatCurrency(paid.price)}</span>
+          </div>
+        </div>
+      )}
+      <div className="sticky bottom-0 mt-4">
+        <div className="w-full flex space-x-4 justify-between text-lg font-semibold">
+          <span>Chưa thanh toán · {waitingForPaying.quantity} món</span>
+          <span>{formatCurrency(waitingForPaying.price)}</span>
+        </div>
+      </div>
     </div>
   );
 }
