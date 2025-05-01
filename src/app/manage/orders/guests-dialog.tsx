@@ -32,6 +32,7 @@ import { formatDateTimeToLocaleString, simpleMatchText } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { GetListGuestsResType } from "@/schemas/account.schema";
 import { endOfDay, format, startOfDay } from "date-fns";
+import { useGetGuestListQuery } from "@/queries/useAccount";
 
 type GuestItem = GetListGuestsResType["data"][0];
 
@@ -89,7 +90,11 @@ export default function GuestsDialog({
   const [open, setOpen] = useState(false);
   const [fromDate, setFromDate] = useState(initFromDate);
   const [toDate, setToDate] = useState(initToDate);
-  const data: GetListGuestsResType["data"] = [];
+  const guestListQuery = useGetGuestListQuery({
+    fromDate,
+    toDate,
+  });
+  const data = guestListQuery.data?.payload.data ?? [];
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -269,7 +274,13 @@ export default function GuestsDialog({
                 <AutoPagination
                   page={table.getState().pagination.pageIndex + 1}
                   pageSize={table.getPageCount()}
-                  pathname="/manage/Guests"
+                  onClick={(pageNumber) =>
+                    table.setPagination({
+                      pageIndex: pageNumber - 1,
+                      pageSize: PAGE_SIZE,
+                    })
+                  }
+                  isLink={false}
                 />
               </div>
             </div>
